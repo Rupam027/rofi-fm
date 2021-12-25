@@ -1,0 +1,27 @@
+#!/usr/bin/python3
+ 
+import os
+from sys import argv , exit
+
+current = os.getcwd()
+while True:
+    option = os.popen(f"ls {current} | rofi -dmenu -theme /home/rupam/scripts/ribbon_bottom.rasi").read().strip("\n")
+    if option == 'q' or option == 'Q' or option == 'quit' :
+        exit()
+    path = current + "/" + option 
+    f = os.path.isfile(path)
+
+    d = os.path.isdir(path)
+    if f == True:
+        os.system(f"xdg-open {path}")
+    elif d == True:
+        current = path +  "/"
+        continue 
+    else:
+        commands = ['open-in-file-manager' , 'quit' , 'create' , 'delete' , 'copy' , 'rename' , 'cut' , 'paste']
+        
+        if option.split(" ")[0] in commands: 
+            print(option)
+        else:
+            os.system('notify-send Invalid Command')
+
