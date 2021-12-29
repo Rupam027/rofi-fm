@@ -2,26 +2,62 @@
  
 import os
 from sys import argv , exit
+import signal 
+
+DEFAULT_FILE_MANAGER = "thunar"
+DEFAULT_TERMINAL = "xfce4-terminal"
+THEME = "/home/rupam/scripts/ribbon_bottom.rasi"
 
 current = os.getcwd()
 while True:
-    option = os.popen(f"ls {current} | rofi -dmenu -theme /home/rupam/scripts/ribbon_bottom.rasi").read().strip("\n")
-    if option == 'q' or option == 'Q' or option == 'quit' :
+    option = os.popen(f"ls {current} | rofi -dmenu -theme {THEME} -p 'rofi-fm@({current})'").read().strip("\n")
+    if option == '':
         exit()
     path = current + "/" + option 
-    f = os.path.isfile(path)
+    files  = os.path.isfile(path)
 
-    d = os.path.isdir(path)
-    if f == True:
-        os.system(f"xdg-open {path}")
-    elif d == True:
-        current = path +  "/"
-        continue 
+    folder = os.path.isdir(path)
+    if files or folder:
+        choices = '\n'.join(['open' , 'copy' , 'rename' , 'delete' , 'cut'])
+        option1 = os.popen(f'echo "{choices}" | rofi -dmenu -theme /home/rupam/scripts/ribbon_bottom.rasi').read().strip("\n")
+        if option1 == '':
+            exit() 
+        elif option1 == 'open':
+            if files:
+                os.system(f'xdg-open "{path}"')
+            elif folder:
+                current = path + "/"
+                continue
+
+        elif option1 == 'copy':
+            exit() 
+        elif option1 == 'rename':
+            exit()
+        elif option1 == 'delete':
+            exit()
+        elif option1 == 'cut' : 
+            exit()
+
     else:
-        commands = ['open-in-file-manager' , 'quit' , 'create' , 'delete' , 'copy' , 'rename' , 'cut' , 'paste']
-        
-        if option.split(" ")[0] in commands: 
-            print(option)
+        commands = [':fm' , ':q' , ':term' , ':paste']
+        option = option.split(" ")
+        if option[0] in commands: 
+            if option[0] == ':q':
+                exit()
+            elif option[0] == ':fm':
+                os.system(f'{DEFAULT_FILE_MANAGER} {current}')
+                exit()
+
+            elif option[0] == ':term':
+                os.system(f'{DEFAULT_TERMINAL} --working-directory={current}')
+                exit()
+
+            elif option[0] == ':paste':
+                pass
+
+
         else:
             os.system('notify-send Invalid Command')
+
+
 
