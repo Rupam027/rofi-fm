@@ -7,7 +7,7 @@ import signal
 DEFAULT_FILE_MANAGER = "thunar"
 DEFAULT_TERMINAL = "xfce4-terminal"
 THEME = "/home/rupam/scripts/ribbon_bottom.rasi"
-
+CLIPBOARD = ""
 current = os.getcwd()
 while True:
     option = os.popen(f"ls {current} | rofi -dmenu -theme {THEME} -p 'rofi-fm@({current})'").read().strip("\n")
@@ -26,20 +26,21 @@ while True:
             if files:
                 os.system(f'xdg-open "{path}"')
             elif folder:
-                current = path + "/"
+                current = path
                 continue
 
         elif option1 == 'copy':
-            exit() 
+
+            CLIPBOARD = "copy " + path 
         elif option1 == 'rename':
-            exit()
+            pass
         elif option1 == 'delete':
-            exit()
+            os.remove(path)
         elif option1 == 'cut' : 
-            exit()
+            CLIPBOARD = "cut " + path
 
     else:
-        commands = [':fm' , ':q' , ':term' , ':paste']
+        commands = [':fm' , ':q' , ':term' , ':paste' , ':b']
         option = option.split(" ")
         if option[0] in commands: 
             if option[0] == ':q':
@@ -53,7 +54,33 @@ while True:
                 exit()
 
             elif option[0] == ':paste':
-                pass
+                import shutil
+                
+                CLIPBOARD = CLIPBOARD.split()
+                n = len(CLIPBOARD)
+                if CLIPBOARD[0] == 'copy':
+                    CLIPBOARD = ' '.join(CLIPBOARD[1:n])
+                    old = CLIPBOARD
+                    CLIPBOARD = CLIPBOARD.split('/')
+                    n = len(CLIPBOARD)
+                    new = current + "/" + CLIPBOARD[(n-1)]
+                    shutil.copy(old ,new)
+            
+                elif CLIPBOARD[0] == 'cut':
+                    CLIPBOARD = ' '.join(CLIPBOARD[1:n])
+                    old = CLIPBOARD
+                    CLIPBOARD = CLIPBOARD.split('/')
+                    n = len(CLIPBOARD)
+                    new = current + "/" + CLIPBOARD[(n-1)]
+                    shutil.copy(old ,new)
+                    os.remove(old)
+
+
+            elif option[0] == ':b':
+                parts = current.split("/")
+                current =  '/' + '/'.join(parts[1:(len(parts)-1)]) 
+                
+                
 
 
         else:
